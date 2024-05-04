@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import JobResults from './JobResults';
-import { fetchJobResults } from './JobFetcher';
+import JobResults from './components/JobResults';
+import { fetchJobResults } from './api';
+import InfiniteScrollGrid from './components/InfiniteScrollGrid';
+import Card from './components/Card';
 
 const App = () => {
   const [jobResults, setJobResults] = useState([]);
@@ -14,7 +16,7 @@ const App = () => {
   return (
     <div>
       <h1>Job Results</h1>
-      <JobResults jobResults={jobResults} />
+      <InfiniteScrollGrid fetchData={fetchJobResults} Renderer={JobResults} renderItem={Card} />
     </div>
   );
 };
