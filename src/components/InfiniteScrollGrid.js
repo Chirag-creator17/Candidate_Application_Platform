@@ -1,67 +1,83 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import JobResults from './JobResults';
 
-const InfiniteScrollGrid = ({ fetchData, Renderer, renderItem }) => {
+const InfiniteScrollGrid = ({ fetchData, Renderer }) => {
     const [items, setItems] = useState([]);
+    const [filteredItems, setFilteredItems] = useState([]);
+
     const [isLoading, setIsLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-    // const [filter, setFilter] = useState('');
+    const [filter, setFilter] = useState([]);
     const [limit] = useState(10);
     const [offset, setOffset] = useState(0);
-    const [initLoad, setInitLoad] = useState(true);
     const [scrollPadding, setScrollPadding] = useState(100);
 
     const loadMoreItems = useCallback(async () => {
         if (isLoading || !hasMore) return;
 
-        setInitLoad(false);
         setIsLoading(true);
         try {
             const data = await fetchData(limit, offset);
             setItems((prevItems) => [...prevItems, ...data.jdList]);
+            appendFilteredItems(data.jdList);
+
             setOffset((prevOffset) => prevOffset + limit);
             setHasMore(data.totalCount > offset);
-
-            console.log('offset', offset);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching data:', error, offset);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
-    }, [fetchData, limit, offset]);
+    });
 
     const handleScroll = useCallback(() => {
-
         const scrollHeight = document.documentElement.scrollHeight;
         const scrollTop = document.documentElement.scrollTop;
         const clientHeight = document.documentElement.clientHeight;
 
-        console.log(scrollTop, clientHeight, scrollHeight);
-        if (scrollTop + clientHeight >= scrollHeight - 100) {
-            loadMoreItems();
+        if (scrollTop + clientHeight >= scrollHeight - scrollPadding) {
+            loadMoreItems();            
         }
-    }, [isLoading, hasMore, loadMoreItems]);
+    });
 
     useEffect(() => {
-        if (initLoad) {
-            loadMoreItems();
-        }
+        setItems([]);
+        loadMoreItems();
+    }, []);
 
+    useEffect(() => {
         window.addEventListener('scroll', handleScroll);
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [handleScroll], [loadMoreItems]);
+    });
+    
 
-    const handleFilterChange = useCallback((e) => {
-        setItems([]);
-        setOffset(0);
-        loadMoreItems();
-    }, [loadMoreItems]);
+    // Filter Job Search 
+    const filterData = (data) => {
+        const filteredData = data.filter((item) => {
+            return filter.every((f) => item.skills.includes(f.value));
+        });
+
+        return filteredData;
+    }
+    
+    const appendFilteredItems = (data) => {
+        const filteredData = filterData(data);
+        setFilteredItems((prevItems) => [...prevItems, ...filteredData]);
+    }
+
+    const updateFilteredItems = (data) => {
+        const filteredData = filterData(data);
+        setFilteredItems(filteredData);
+    }
+
+    useEffect(() => {        
+        updateFilteredItems(items);
+    }, [filter]);
 
     return (
         <div>
-            <Renderer Component={renderItem} data={items} />
-            {/* <JobResults jobResults={items} /> */}
+            <Renderer data={filteredItems} />
         </div>
     );
 };

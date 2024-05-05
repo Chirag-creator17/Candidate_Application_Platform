@@ -24,6 +24,5 @@ export const fetchJobResults = async ({limit, offset}) => {
         return data;
     } catch (error) {
         console.error('Error fetching job results:', error);
-        throw error;
     }
 };

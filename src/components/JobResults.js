@@ -1,6 +1,7 @@
 import React from 'react';
+import Card from './Card';
 
-const JobResults = ({ Component, data }) => {
+const JobResults = ({ data }) => {
 
     return (
         <div style={{
@@ -12,7 +13,7 @@ const JobResults = ({ Component, data }) => {
         }}>
             {data.map((job, index) => (
                 <div key={index} >
-                    <Component data={job} />
+                    <Card data={job} />
                 </div>
             ))}
         </div>
