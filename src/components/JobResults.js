@@ -5,8 +5,8 @@ const JobResults = ({ data }) => {
 
     return (
         <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(350px, 1fr))',
+            display: 'flex',
+            flexWrap:'wrap',
             gap: '1rem',
             alignContent: 'space-between',
             alignItems: 'inherit'

@@ -2,7 +2,7 @@ import React from 'react';
 import './Card.css';
 
 const Card = ({ data }) => {
-    
+
     return (
         <div className="card">
             <div className="card-header">
@@ -14,7 +14,7 @@ const Card = ({ data }) => {
                 <p className="location">{data.location}</p>
                 <div className="salary">
                     <span className="salary-label">Estimated Salary:</span>
-                    <span className="salary-range">{data.minJdSalary} - {data.maxJdSalary} {data.salaryCurrencyCode} </span>
+                    <span className="salary-range">{data.minJdSalary || 0} - {data.maxJdSalary} {data.salaryCurrencyCode} </span>
                     {/* <span className="salary-warning">&#9888;</span> */}
                 </div>
                 <div className="company-info">
@@ -25,15 +25,16 @@ const Card = ({ data }) => {
                 </div>
                 <div className="role-info">
                     <h5>About Role:</h5>
-                    <p>{data.dataDetailsFromCompany}: </p>
+                    <p>{data.jobDetailsFromCompany}: </p>
                 </div>
                 <div className="experience">
                     <h5>Minimum Experience:</h5>
-                    <p>{data.minExp} </p>
+                    <p>{data.minExp || 0} </p>
                 </div>
             </div>
             <div className="card-footer">
                 <button className="easy-apply-btn">Easy Apply</button>
+                
                 <button className="referral-btn">Ask for referral</button>
             </div>
         </div>

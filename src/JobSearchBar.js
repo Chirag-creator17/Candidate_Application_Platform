@@ -2,42 +2,60 @@ import SearchBar from "./components/SearchBar"
 
 const SearchField = (searchParams) => {
 
-    console.log('searchParams:', searchParams);
     const search = {
+        type: searchParams.type || 'text',
         options: searchParams.options || [],
         placeholder: searchParams.placeholder || '',
         isMulti: searchParams.isMulti || false,
-        onChange: searchParams.onChange || ((option) => { })
-
+        onChange: searchParams.onChange || ((option) => { }),
     }
 
     return search
 }
 
-const ExperienceSearch = (onSelect) => {
+const Filter = (filterParams) => {
+
+    const filter = {
+        option: filterParams.option,
+        filterType: filterParams.filterType || 'single',
+        onFilter: filterParams.onFilter
+    }
+
+    return filter
+}
+
+const ExperienceSearch = ({ onSelect }) => {
     const options = [
-        { value: '1', label: '1 year' },
-        { value: '2', label: '2 years' },
-        { value: '3', label: '3+ years' },
+        { value: 1, label: '0-1 year' },
+        { value: 2, label: '2+ years' },
+        { value: 3, label: '3+ years' },
     ]
 
     const onChange = (option) => {
-        onSelect && onSelect(option)
-        console.log('Selected experience:', option)
+        const filter = Filter({ option: option, filterType: 'experience', onFilter: filterJobs })
+        onSelect && onSelect(filter)
+    }
+
+    const filterJobs = (data, option) => {
+        const minExp = data.minExp || 0
+
+        if (option.value == 1) return minExp <= option.value
+        else return minExp >= option.value
     }
 
     const placeholder = 'Experience'
 
     return SearchField({
+        type: 'select',
         options: options,
-        placeholder: 'Experience',
+        placeholder: placeholder,
         isMulti: true,
-        onChange: onChange
+        onChange: onChange,
     })
 
 }
 
-const RoleSearch = (onSelect) => {
+const RoleSearch = ({ onSelect }) => {
     const options = [
         { value: 'frontend', label: 'Frontend' },
         { value: 'backend', label: 'Backend' },
@@ -45,43 +63,61 @@ const RoleSearch = (onSelect) => {
     ]
 
     const onChange = (option) => {
-        onSelect && onSelect(option)
-        console.log('Selected role:', option)
+        const filter = Filter({ option: option, filterType: 'role', onFilter: filterJobs })
+        onSelect && onSelect(filter)
     }
+
+    const filterJobs = (data, option) => {
+        const currRole = (data.jobRole || '').toLowerCase()
+        return currRole.includes(option.value)
+    }
+
+    const placeholder = 'Role'
 
     return SearchField(
         {
+            type: 'select',
             options: options,
             isMulti: true,
-            placeholder: 'Role',
-            onChange: onChange
+            placeholder: placeholder,
+            onChange: onChange,
         }
     )
 }
 
-const LocationSearch = (onSelect) => {
+const LocationSearch = ({ onSelect }) => {
     const options = [
         { value: 'remote', label: 'Remote' },
-        { value: 'hybrid1', label: 'Hybrid' },
+        { value: 'hybrid', label: 'Hybrid' },
         { value: 'in-office', label: 'On-site' },
     ]
 
     const onChange = (option) => {
-        onSelect && onSelect(option)
-        console.log('Selected location:', option)
+        const filter = Filter({ option: option, filterType: 'location', onFilter: filterJobs })
+        onSelect && onSelect(filter)
+    }
+
+    const filterJobs = (data, option) => {
+        const locations = (data.location || '').toLowerCase()
+
+        if (option.value === 'remote' || option.value === 'hybrid')
+            return locations.includes(option.value)
+        else
+            return !locations.includes('remote') && !locations.includes('hybrid')
     }
 
     return SearchField(
         {
+            type: 'select',
             options: options,
             isMulti: true,
             placeholder: 'Location',
-            onChange: onChange
+            onChange: onChange,
         }
     )
 }
 
-const NumberOfEmployeesSearch = (onSelect) => {
+const NumberOfEmployeesSearch = ({ onSelect }) => {
     const options = [
         { value: '1-10', label: '1-10' },
         { value: '11-50', label: '11-50' },
@@ -89,21 +125,31 @@ const NumberOfEmployeesSearch = (onSelect) => {
     ]
 
     const onChange = (option) => {
-        onSelect && onSelect(option)
-        console.log('Selected number of employees:', option)
+        const filter = Filter({
+            option: option,
+            filterType: 'numEmp',
+            onFilter: filterJobs
+        })
+        onSelect && onSelect(filter)
+    }
+
+    const filterJobs = (data, option) => {
+        // todo : This field is not provided by the api
+        return true
     }
 
     return SearchField(
         {
+            type: 'select',
             options: options,
             isMulti: true,
             placeholder: 'Number of Employees',
-            onChange: onChange
+            onChange: onChange,
         }
     )
 }
 
-const TechStackSearch = (onSelect) => {
+const TechStackSearch = ({ onSelect }) => {
     const options = [
         { value: 'react', label: 'React' },
         { value: 'angular', label: 'Angular' },
@@ -111,56 +157,105 @@ const TechStackSearch = (onSelect) => {
     ]
 
     const onChange = (option) => {
-        onSelect && onSelect(option)
-        console.log('Selected tech stack:', option)
+        const filter = Filter({
+            option: option,
+            filterType: 'techStack',
+            onFilter: filterJobs
+        })
+        onSelect && onSelect(filter)
+    }
+
+    const filterJobs = (data, option) => {
+        // todo : This field is not provided by the api
+        return true
     }
 
     return SearchField(
         {
+            type: 'select',
             options: options,
             isMulti: true,
             placeholder: 'Tech Stack',
-            onChange: onChange
+            onChange: onChange,
         }
     )
 }
 
-const SalarySearch = (onSelect) => {
+const SalarySearch = ({ onSelect }) => {
     const options = [
-        { value: '1lpa', label: '0-50k' },
-        { value: '2lpa', label: '50-100k' },
-        { value: '100k+', label: '100k+' },
+        { value: 0, label: '0L' },
+        { value: 10, label: '10L' },
+        { value: 20, label: '20L' },
     ]
 
     const onChange = (option) => {
-        onSelect && onSelect(option)
-        console.log('Selected salary:', option)
+        const filter = Filter({
+            option: option,
+            filterType: 'salary',
+            onFilter: filterJobs
+        })
+        onSelect && onSelect(filter)
+    }
+
+    const filterJobs = (data, option) => {
+        const minSalary = data.minJdSalary || 0
+        const maxSalary = data.maxJdSalary || 9999999
+
+        const salary = option.value
+        return minSalary <= salary && salary <= maxSalary
     }
 
     return SearchField(
         {
+            type: 'select',
             options: options,
             isMulti: true,
             placeholder: 'Salary',
-            onChange: onChange
+            onChange: onChange,
         }
     )
 }
 
-const JobSearchBar = () => {
 
-    const expSearch = ExperienceSearch()
-    const roleSearch = RoleSearch()
-    const locationSearch = LocationSearch()
-    const numEmpSearch = NumberOfEmployeesSearch()
-    const techStackSearch = TechStackSearch()
-    const salarySearch = SalarySearch()
+const CompanySearch = ({ onSelect }) => {
 
-    const jobSearchFields = [expSearch, roleSearch, locationSearch, numEmpSearch, techStackSearch, salarySearch]
+    const filterJobs = (data, searchQry) => {
+        const company = (data.companyName || '').toLowerCase()
+        return company.includes(searchQry.toLowerCase())
+    }
 
-    console.log('jobSearchFields:', jobSearchFields);
+    return SearchField(
+        {
+            type: 'text',
+            placeholder: 'Search Company',
+            onChange: (searchQry) => {
+                const filter = Filter({
+                    option: searchQry,
+                    filterType: 'company',
+                    onFilter: filterJobs
+                })
+                onSelect && onSelect(filter)
+            }
+        }
+    )
+
+
+}
+
+const JobSearchBar = (onSelect) => {
+
+    const expSearch = ExperienceSearch(onSelect)
+    const roleSearch = RoleSearch(onSelect)
+    const locationSearch = LocationSearch(onSelect)
+    const numEmpSearch = NumberOfEmployeesSearch(onSelect)
+    const techStackSearch = TechStackSearch(onSelect)
+    const salarySearch = SalarySearch(onSelect)
+    const companySearch = CompanySearch(onSelect)
+    
+    const jobSearchFields = [expSearch, roleSearch, locationSearch, numEmpSearch, techStackSearch, salarySearch, companySearch]
+
     return (
-        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-start' }}>
             <SearchBar searchFields={jobSearchFields} />
         </div>
     )

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import JobSearchBar from '../JobSearchBar';
+import JobResults from './JobResults';
 
-const InfiniteScrollGrid = ({ fetchData, Renderer }) => {
+const InfiniteScrollGrid = ({ fetchData }) => {
     const [items, setItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
 
@@ -35,7 +37,7 @@ const InfiniteScrollGrid = ({ fetchData, Renderer }) => {
         const clientHeight = document.documentElement.clientHeight;
 
         if (scrollTop + clientHeight >= scrollHeight - scrollPadding) {
-            loadMoreItems();            
+            loadMoreItems();
         }
     });
 
@@ -50,17 +52,35 @@ const InfiniteScrollGrid = ({ fetchData, Renderer }) => {
             window.removeEventListener('scroll', handleScroll);
         };
     });
-    
 
-    // Filter Job Search 
+    // Filter Job Search
+    const onSelect = (newFilter) => {
+
+        const contains = filter.some((f) => f.filterType === newFilter.filterType);
+
+        if (contains) {
+            setFilter((prevFilter) => prevFilter.filter((f) => f.filterType !== newFilter.filterType));
+        }
+
+        setFilter((prevFilter) => [...prevFilter, newFilter]);
+    }
+
     const filterData = (data) => {
         const filteredData = data.filter((item) => {
-            return filter.every((f) => item.skills.includes(f.value));
+            return filter.every((f) => {
+                if (f.option.length == 0) return true;
+
+                if (f.filterType === 'company') return f.onFilter(item, f.option);
+                
+                return f.option.some((option) => {
+                    return f.onFilter(item, option);
+                });
+            });
         });
 
         return filteredData;
     }
-    
+
     const appendFilteredItems = (data) => {
         const filteredData = filterData(data);
         setFilteredItems((prevItems) => [...prevItems, ...filteredData]);
@@ -71,13 +91,21 @@ const InfiniteScrollGrid = ({ fetchData, Renderer }) => {
         setFilteredItems(filteredData);
     }
 
-    useEffect(() => {        
+    useEffect(() => {
         updateFilteredItems(items);
     }, [filter]);
 
     return (
-        <div>
-            <Renderer data={filteredItems} />
+        <div style={
+            {
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '15px',
+                alignItems: 'flex-start',
+            }
+        }>
+            <JobSearchBar onSelect={onSelect} />
+            <JobResults data={filteredItems} />
         </div>
     );
 };
